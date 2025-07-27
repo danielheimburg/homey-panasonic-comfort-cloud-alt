@@ -1,0 +1,18 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Heat Consumption Rate"
+  },
+  "uiComponent": "sensor",
+  "units": {
+    "en": "%"
+  },
+  "min": 0,
+  "max": 100,
+  "getable": true,
+  "setable": false,
+  "insights": true,
+  "insightsTitleTrue": {
+    "en": "Heat Consumption Rate"
+  }
+}

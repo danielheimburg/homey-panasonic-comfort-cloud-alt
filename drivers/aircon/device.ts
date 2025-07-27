@@ -61,8 +61,12 @@ export class MyDevice extends Homey.Device {
     // Filter out the -255 values, which are used to indicate hours that has not passed yet in the current day
     let historyWithData = historyData.historyDataList.filter((i: any) => i.consumption != -255);
 
-    // Always process energy consumption first (even if device is OFF to capture residual consumption)
-    await this.updateEnergyConsumption(historyWithData);
+    // Only process completed hours for energy consumption (exclude current incomplete hour)
+    let completedHours = historyWithData.slice(0, -1);
+    await this.updateEnergyConsumption(completedHours);
+
+    // Update heat and cool consumption rates from completed hours
+    await this.updateConsumptionRates(historyWithData);
 
     // Get the consumption from the current hour (last available data)
     let consumption = historyWithData?.[historyWithData?.length - 1]?.consumption || 0;
@@ -98,14 +102,37 @@ export class MyDevice extends Homey.Device {
       }
     }
     
-    // Update meter_power and store processed hours if we have new consumption
+    // Update meter_power if we have new consumption
     if (newConsumption > 0) {
       const newMeterValue = lastMeterValue + newConsumption;
       this.setCap('meter_power', newMeterValue);
-      
-      // Store the updated state in device data
-      this.setStoreValue('processedHours', newProcessedHours);
       this.setStoreValue('lastMeterValue', newMeterValue);
+    }
+    
+    // Always store processed hours (even if newConsumption is 0)
+    this.setStoreValue('processedHours', newProcessedHours);
+  }
+
+  // Update heat and cool consumption rates from the most recent completed hour
+  async updateConsumptionRates(historyWithData: any[]) {
+    if (historyWithData.length === 0) return;
+
+    // Get the most recent completed hour (exclude current incomplete hour)
+    const completedHours = historyWithData.slice(0, -1);
+    if (completedHours.length === 0) return;
+
+    const lastCompletedHour = completedHours[completedHours.length - 1];
+    
+    // Set heat consumption rate (convert from decimal to percentage)
+    if (lastCompletedHour.heatConsumptionRate !== undefined && lastCompletedHour.heatConsumptionRate >= 0) {
+      const heatRatePercent = lastCompletedHour.heatConsumptionRate * 100;
+      this.setCap('heat_consumption_rate', heatRatePercent);
+    }
+    
+    // Set cool consumption rate (convert from decimal to percentage)  
+    if (lastCompletedHour.coolConsumptionRate !== undefined && lastCompletedHour.coolConsumptionRate >= 0) {
+      const coolRatePercent = lastCompletedHour.coolConsumptionRate * 100;
+      this.setCap('cool_consumption_rate', coolRatePercent);
     }
   }
   

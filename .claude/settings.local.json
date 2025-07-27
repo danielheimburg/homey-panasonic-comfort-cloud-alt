@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:apps.developer.homey.app)",
+      "WebFetch(domain:community.homey.app)",
+      "WebFetch(domain:github.com)",
+      "Bash(homey app install:*)",
+      "Bash(homey app log:*)",
+      "Bash(grep:*)",
+      "Bash(git push:*)",
+      "Bash(homey:*)"
+    ],
+    "deny": []
+  }
+}

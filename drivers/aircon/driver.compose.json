@@ -16,7 +16,9 @@
     "air_swing_ud",
     "nanoe_mode",
     "measure_power",
-    "meter_power"
+    "meter_power",
+    "heat_consumption_rate",
+    "cool_consumption_rate"
   ],
   "capabilitiesOptions": {
     "measure_power": {
